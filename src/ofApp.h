@@ -20,4 +20,12 @@ class ofApp : public ofBaseApp{
 
         bool bPauseState;
         bool bAction;
+        bool bFadeIn;
+        bool bFadeOut;
+        float fade;
+        float curTime;
+        float prevTime;
+        const float fadeTime = 1.0f;
+
+        ofFbo fbo;
 };
