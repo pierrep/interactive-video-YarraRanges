@@ -11,6 +11,9 @@ void ofApp::setup(){
     HPV::InitHPVEngine();
     HPV::AddEventListener(this, &ofApp::onHPVEvent);
 
+    device.setLogLevel(OF_LOG_WARNING);
+    device.setup(0);
+    tracker.setup(device);
 
     /* Create resources for new player */
     player1.init(HPV::NewPlayer());
@@ -39,18 +42,36 @@ void ofApp::setup(){
     bFadeIn = false;
     bFadeOut = false;
 
+    bShowFps = true;
+    bDrawDebug = true;
+
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     /* Update happens on global level for all active players by HPV Manager */
     HPV::Update();
+
+    /* Kinect update */
+    device.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
     ofBackground(0);
+
+    if(tracker.getNumUser() >= 1) {
+        if(tracker.getUser(0)->isVisible()) {
+            ofVec2f p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftShoulder;
+            ofVec2f p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightShoulder;
+
+            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
+                triggerAnimation();
+            }
+
+        }
+    }
 
     fbo.begin();
     ofClear(0,0,0,255);
@@ -101,13 +122,29 @@ void ofApp::draw(){
     fbo.draw(0,0,1920,1080);
 
     ofEnableAlphaBlending();
+
+    if(bDrawDebug) {
+        depthPixels = tracker.getPixelsRef(1000, 4000);
+        depthTexture.loadData(depthPixels);
+
+        // draw in 2D
+        ofSetColor(255);
+        depthTexture.draw(0, 0);
+        tracker.draw();
+    }
+
+    if(bShowFps) ofDrawBitmapString(ofToString(ofGetFrameRate()),20,20);
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-    /* Cleanup and destroy HPV Engine upon exit */
-   // HPV::DestroyHPVEngine();
+    /* Clean up and destroy HPV Engine upon exit */
+    HPV::DestroyHPVEngine();
+
+    /* Clean up after Kinect */
+    tracker.exit();
+    device.exit();
 }
 
 //--------------------------------------------------------------
@@ -147,17 +184,19 @@ void ofApp::onHPVEvent(const HPVEvent& event)
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-    if (key == 'f')
+    if (key == 'F')
     {
         ofToggleFullscreen();
     }
+    else if (key == 'f') {
+        bShowFps = !bShowFps;
+    }
+    else if (key == 'd') {
+        bDrawDebug = !bDrawDebug;
+    }
     else if (key == 'p')
     {
-        player2.play();
-        bAction = true;
-        bFadeIn = true;
-        prevTime = curTime = ofGetElapsedTimeMillis();
-        fade = 0.0f;
+        triggerAnimation();
     }
     else if (key == ' ')
     {
@@ -176,6 +215,16 @@ void ofApp::keyPressed(int key)
     else if (key == '4') {
         readyAnimation("toes1.hpv");
     }
+}
+
+//--------------------------------------------------------------
+void ofApp::triggerAnimation()
+{
+    player2.play();
+    bAction = true;
+    bFadeIn = true;
+    prevTime = curTime = ofGetElapsedTimeMillis();
+    fade = 0.0f;
 }
 
 //--------------------------------------------------------------
