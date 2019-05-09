@@ -2,5 +2,6 @@ bin/interactive-video-YarraRanges_debug
 build/
 interactive-video-YarraRanges.qbs.user
 bin/data/*.hpv
+bin/data/media0/*.hpv
 bin/libfmodex.so
 
