@@ -49,8 +49,8 @@ void ofApp::setup(){
     bFadeIn = false;
     bFadeOut = false;
 
-    bShowFps = true;
-    bDrawDebug = true;
+    bShowFps = false;
+    bDrawDebug = false;
 
 }
 
@@ -64,80 +64,100 @@ void ofApp::update(){
 }
 
 //--------------------------------------------------------------
+void ofApp::checkInteraction()
+{
+    if(trackedId > -1) {
+
+        if((tracker.getUserByID(trackedId)->isVisible()) && (tracker.getUserByID(trackedId)->head.x != 0) && (tracker.getUserByID(trackedId)->head.y != 0)) {
+            ofVec2f p1,p2;
+            leftHand = tracker.getUserByID(trackedId)->leftHand;
+            leftKnee = tracker.getUserByID(trackedId)->leftKnee;
+            leftFoot = tracker.getUserByID(trackedId)->leftFoot;
+
+            //Head
+            p1  = tracker.getUserByID(trackedId)->leftHand - tracker.getUserByID(trackedId)->head;
+            p2  = tracker.getUserByID(trackedId)->rightHand - tracker.getUserByID(trackedId)->head;
+            if( (p1.length() <= 30) || (p2.length() <= 30) ) {
+                touched[0] = true;
+                return;
+            } else {
+                if(touched[0] == true) {
+                    touched[0] = false;
+                    triggerAnimation(0);
+                    return;
+                }
+            }
+
+            //Shoulders
+            p1  = tracker.getUserByID(trackedId)->leftHand -  tracker.getUserByID(trackedId)->leftShoulder;
+            p2  = tracker.getUserByID(trackedId)->rightHand -  tracker.getUserByID(trackedId)->rightShoulder;
+            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
+                touched[1] = true;
+                return;
+            } else {
+                if(touched[1] == true) {
+                    touched[1] = false;
+                    triggerAnimation(1);
+                    return;
+                }
+            }
+
+            //Knees
+            p1  = tracker.getUserByID(trackedId)->leftHand -  tracker.getUserByID(trackedId)->leftKnee;
+            p2  = tracker.getUserByID(trackedId)->rightHand -  tracker.getUserByID(trackedId)->rightKnee;
+            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
+                touched[2] = true;
+                return;
+            } else {
+                if(touched[2] == true) {
+                    touched[2] = false;
+                    triggerAnimation(2);
+                    return;
+                }
+            }
+
+            //Toes
+            p1  = tracker.getUserByID(trackedId)->leftHand - tracker.getUserByID(trackedId)->leftFoot;
+            p2  = tracker.getUserByID(trackedId)->rightHand - tracker.getUserByID(trackedId)->rightFoot;
+
+            if( (p1.length() <= 50) || (p2.length() <= 50) ) {
+                touched[3] = true;
+                return;
+            } else {
+                if(touched[3] == true) {
+                    touched[3] = false;
+                    triggerAnimation(3);
+                    return;
+                }
+            }
+        }
+        else {
+            for(int i = 0;i < 4;i++) {
+                touched[i] = false;
+            }
+        }
+    }
+
+}
+
+//--------------------------------------------------------------
 void ofApp::draw(){
 
     ofBackground(0);
 
     if(bKinectFound && (tracker.getNumUser() >= 1)) {
-        if((tracker.getUser(0)->isVisible()) && (tracker.getUser(0)->head.x != 0) && (tracker.getUser(0)->head.y != 0)) {
-            ofVec2f p1,p2;
-            leftHand = tracker.getUser(0)->leftHand;
-            leftKnee = tracker.getUser(0)->leftKnee;
-            leftFoot = tracker.getUser(0)->leftFoot;
-
-            //Head
-            p1  = tracker.getUser(0)->leftHand - tracker.getUser(0)->head;
-            p2  = tracker.getUser(0)->rightHand - tracker.getUser(0)->head;
-
-            if( (p1.length() <= 40) || (p2.length() <= 40) ) {
-                touched[0] = true;
-            } else {
-                if(touched[0] == true) {
-                    triggerAnimation(0);
-                }
-                touched[0] = false;
-            }
-
-            //Shoulders
-            p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftShoulder;
-            p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightShoulder;
-
-            if( (p1.length() <= 40) && (p2.length() <= 40) ) {
-                touched[1] = true;
-            } else {
-                if(touched[1] == true) {
-                    triggerAnimation(1);
-                }
-                touched[1] = false;
-            }
-
-            //Knees
-            p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftKnee;
-            p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightKnee;
-
-            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
-                touched[2] = true;
-            } else {
-                if(touched[2] == true) {
-                    cout << "trigger knee" << endl;
-                    triggerAnimation(2);
-                }
-                touched[2] = false;
-            }
-
-            //Toes
-            p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftKnee;
-            p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightKnee;
-
-            if( (p1.length() <= 50) || (p2.length() <= 50) ) {
-                cout << "p1.length = " << p1.length() << endl;
-                cout << "p2.length = " << p1.length() << endl;
-                touched[3] = true;
-            } else {
-                if(touched[3] == true) {
-                    cout << "trigger toes" << endl;
-                    triggerAnimation(3);
-                }
-                touched[3] = false;
-            }
-
-        }
-        else {
-            for(int i = 0;i < 4;i++)
-            {
-                touched[i] = false;
+        trackedId = -1;
+        for(int i =0; i < tracker.getNumUser();i++)
+        {
+            int state = tracker.getUser(i)->get().getSkeleton().getState();
+            if(state == nite::SKELETON_TRACKED) {
+                trackedId = tracker.getUser(i)->getId();
+                break;
             }
         }
+
+        checkInteraction();
+
     }
 
 
@@ -153,8 +173,6 @@ void ofApp::draw(){
             fade = 1.0f;
         }
 
-        //cout << "Fade in: " << fade << endl;
-
         ofSetColor(255,255,255,255.0f);
         player2.draw(0,0,ofGetWidth(), ofGetHeight());
 
@@ -168,8 +186,6 @@ void ofApp::draw(){
             bFadeOut = false;
             fade = 1.0f;
         }
-
-       // cout << "Fade out: " << fade << endl;
 
         ofSetColor(255,255,255,255.0f);
         player1.draw(0,0,ofGetWidth(), ofGetHeight());
@@ -307,7 +323,7 @@ void ofApp::triggerAnimation(unsigned int type)
 {
     if(bAction) return;
 
-    cout << "trigger animation" << type << endl;
+    ofLogNotice() << "trigger animation" << type;
     if(type == 0) {
         readyAnimation("media0/head1.hpv");
         headAudio.play();
@@ -321,7 +337,6 @@ void ofApp::triggerAnimation(unsigned int type)
         readyAnimation("media0/toes1.hpv");
         toesAudio.play();
     }
-
 
     player2.play();    
     bAction = true;

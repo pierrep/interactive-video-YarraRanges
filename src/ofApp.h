@@ -16,6 +16,7 @@ class ofApp : public ofBaseApp{
 		void keyPressed(int key);
         void readyAnimation(string filename);
         void triggerAnimation(unsigned int type);
+        void checkInteraction();
         void onHPVEvent(const HPVEvent& event);
 
         ofxHPVPlayer player1;
@@ -38,6 +39,8 @@ class ofApp : public ofBaseApp{
         ofVec2f leftHand;
         ofVec2f leftKnee;
         ofVec2f leftFoot;
+
+        int trackedId;
 
         bool touched[4]; // 0 = head, 1 = shoulders, 2 = knees, 3 = toes
 

@@ -1,4 +1,5 @@
 bin/interactive-video-YarraRanges_debug
+bin/interactive-video-YarraRanges
 build/
 interactive-video-YarraRanges.qbs.user
 bin/data/*.hpv
