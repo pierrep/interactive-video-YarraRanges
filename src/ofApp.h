@@ -35,6 +35,10 @@ class ofApp : public ofBaseApp{
         float prevTime;
         const float fadeTime = 0.25f;
 
+        ofVec2f leftHand;
+        ofVec2f leftKnee;
+        ofVec2f leftFoot;
+
         bool touched[4]; // 0 = head, 1 = shoulders, 2 = knees, 3 = toes
 
         ofFbo fbo;

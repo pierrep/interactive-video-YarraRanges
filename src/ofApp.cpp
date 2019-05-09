@@ -68,9 +68,12 @@ void ofApp::draw(){
 
     ofBackground(0);
 
-    if(bKinectFound && (bAction == false) && (tracker.getNumUser() >= 1)) {
-        if(tracker.getUser(0)->isVisible()) {
+    if(bKinectFound && (tracker.getNumUser() >= 1)) {
+        if((tracker.getUser(0)->isVisible()) && (tracker.getUser(0)->head.x != 0) && (tracker.getUser(0)->head.y != 0)) {
             ofVec2f p1,p2;
+            leftHand = tracker.getUser(0)->leftHand;
+            leftKnee = tracker.getUser(0)->leftKnee;
+            leftFoot = tracker.getUser(0)->leftFoot;
 
             //Head
             p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->head;
@@ -105,15 +108,30 @@ void ofApp::draw(){
                 touched[2] = true;
             } else {
                 if(touched[2] == true) {
+                    cout << "trigger knee" << endl;
                     triggerAnimation(2);
                 }
-                touched[1] = false;
+                touched[2] = false;
             }
 
+            //Toes
+            p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftKnee;
+            p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightKnee;
 
+            if( (p1.length() <= 50) || (p2.length() <= 50) ) {
+                cout << "p1.length = " << p1.length() << endl;
+                cout << "p2.length = " << p1.length() << endl;
+                touched[3] = true;
+            } else {
+                if(touched[3] == true) {
+                    cout << "trigger toes" << endl;
+                    triggerAnimation(3);
+                }
+                touched[3] = false;
+            }
 
-
-        } else {
+        }
+        else {
             for(int i = 0;i < 4;i++)
             {
                 touched[i] = false;
@@ -182,7 +200,12 @@ void ofApp::draw(){
         tracker.draw();
     }
 
-    if(bShowFps) ofDrawBitmapString(ofToString(ofGetFrameRate()),20,20);
+    if(bShowFps) ofDrawBitmapString(ofToString(ofGetFrameRate()),20,ofGetHeight() - 20);
+    if(bShowFps) ofDrawBitmapString("bAction: "+ofToString(bAction),100,ofGetHeight() - 20);
+    if(bShowFps) ofDrawBitmapString("leftHand: "+ofToString(leftHand),20,ofGetHeight() - 40);
+    if(bShowFps) ofDrawBitmapString("leftKnee: "+ofToString(leftKnee),320,ofGetHeight() - 40);
+    if(bShowFps) ofDrawBitmapString("leftFoot: "+ofToString(leftFoot),620,ofGetHeight() - 40);
+
 }
 
 //--------------------------------------------------------------
@@ -281,6 +304,9 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::triggerAnimation(unsigned int type)
 {
+    if(bAction) return;
+
+    cout << "trigger animation" << type << endl;
     if(type == 0) {
         readyAnimation("media0/head1.hpv");
         headAudio.play();
