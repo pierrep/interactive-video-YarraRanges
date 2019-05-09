@@ -68,7 +68,7 @@ void ofApp::draw(){
 
     ofBackground(0);
 
-    if(bKinectFound && (tracker.getNumUser() >= 1)) {
+    if(bKinectFound && (bAction == false) && (tracker.getNumUser() >= 1)) {
         if(tracker.getUser(0)->isVisible()) {
             ofVec2f p1,p2;
 
