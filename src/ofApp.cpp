@@ -91,7 +91,7 @@ void ofApp::checkInteraction()
             //Shoulders
             p1  = tracker.getUserByID(trackedId)->leftHand -  tracker.getUserByID(trackedId)->leftShoulder;
             p2  = tracker.getUserByID(trackedId)->rightHand -  tracker.getUserByID(trackedId)->rightShoulder;
-            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
+            if( (p1.length() <= 40) && (p2.length() <= 40) ) {
                 touched[1] = true;
                 return;
             } else {
