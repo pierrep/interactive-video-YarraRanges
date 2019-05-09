@@ -76,9 +76,10 @@ void ofApp::draw(){
             leftFoot = tracker.getUser(0)->leftFoot;
 
             //Head
-            p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->head;
+            p1  = tracker.getUser(0)->leftHand - tracker.getUser(0)->head;
+            p2  = tracker.getUser(0)->rightHand - tracker.getUser(0)->head;
 
-            if( (p1.length() <= 50) ) {
+            if( (p1.length() <= 40) || (p2.length() <= 40) ) {
                 touched[0] = true;
             } else {
                 if(touched[0] == true) {
@@ -91,7 +92,7 @@ void ofApp::draw(){
             p1  = tracker.getUser(0)->leftHand -  tracker.getUser(0)->leftShoulder;
             p2  = tracker.getUser(0)->rightHand -  tracker.getUser(0)->rightShoulder;
 
-            if( (p1.length() <= 50) && (p2.length() <= 50) ) {
+            if( (p1.length() <= 40) && (p2.length() <= 40) ) {
                 touched[1] = true;
             } else {
                 if(touched[1] == true) {
